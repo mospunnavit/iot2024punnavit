@@ -13,4 +13,3 @@ class Book(Base):
     is_published = Column(Boolean, index=True)
 
 
-class 
