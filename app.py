@@ -1,3 +1,4 @@
+import string
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -49,10 +50,64 @@ async def create_book(book: dict, response: Response, db: Session = Depends(get_
     response.status_code = 201
     return newbook
 
-# @router_v1.patch('/books/{book_id}')
-# async def update_book(book_id: int, book: dict, db: Session = Depends(get_db)):
-#     pass
+@router_v1.post('/Students')
+async def create_student(student: dict, response: Response, db: Session = Depends(get_db)):
+    # TODO: Add validation
+    newstudent = models.Student(student_id=student['student_id'], firstname=student['firstname'], lastname=student['lastname'], Gender=student['Gender'], brithdate=student['brithdate'])
+    db.add(newstudent)
+    db.commit()
+    db.refresh(newstudent)
+    response.status_code = 201
+    return newstudent
 
+
+@router_v1.get('/Students/{student_id}')
+async def get_student(student_id: str, db: Session = Depends(get_db)):
+    result = db.query(
+        models.Student.student_id, 
+        models.Student.firstname, 
+        models.Student.lastname,
+        models.Student.Gender,
+        models.Student.brithdate
+    ).filter(
+        models.Student.student_id == student_id
+    ).first()
+    
+    if result:
+        # Convert the result to a dictionary
+        return {
+            "student_id": result.student_id,
+            "firstname": result.firstname,
+            "lastname": result.lastname,
+            "Gender": result.Gender,
+            "brithdate": result.brithdate
+        }
+    else:
+        return None
+
+
+@router_v1.patch('/Students/{student_id}')
+async def update_student(student_id: str, student_data: dict, db: Session = Depends(get_db)):
+    student = db.query(models.Student).filter(models.Student.student_id == student_id).first()
+    if not student:
+        return {"detail": "Student not found"}
+
+    for key, value in student_data.items():
+        setattr(student, key, value)
+
+    db.commit()
+    db.refresh(student)
+    return {"detail": f"StudentID {student_id} updated successfully"}
+
+@router_v1.delete('/Students/{student_id}')
+async def delete_student(student_id: str, db: Session = Depends(get_db)):
+    student = db.query(models.Student).filter(models.Student.student_id == student_id).first()
+    if not student:
+        return {"detail": "Student not found"}
+    
+    db.delete(student)
+    db.commit()
+    return {"detail": f"StudentID {student_id} deleted successfully"}
 # @router_v1.delete('/books/{book_id}')
 # async def delete_book(book_id: int, db: Session = Depends(get_db)):
 #     pass
