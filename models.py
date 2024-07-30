@@ -44,11 +44,7 @@ class Order(Base):
     details = Column(String, index=True)
     status = Column(String, index=True)
     
-class Staff(Base):
 
-    staff_id = Column(Integer, primary_key=True, index=True)
-    staff_name = Column(String, index=True)
-    staff_role = Column(String,index=True)
 
 
 
