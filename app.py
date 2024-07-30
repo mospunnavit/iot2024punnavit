@@ -40,15 +40,66 @@ async def get_books(db: Session = Depends(get_db)):
 async def get_book(book_id: int, db: Session = Depends(get_db)):
     return db.query(models.Book).filter(models.Book.id == book_id).first()
 
+@router_v1.get('/menus')
+async def get_books(db: Session = Depends(get_db)):
+    return db.query(models.Menu).all()
+
+@router_v1.post('/order')
+async def create_orders(order: dict, response: Response, db: Session = Depends(get_db)):
+    # TODO: Add validation
+    neworeder = models.Order(details=order['details'], status=order['status'])
+    db.add(neworeder)
+    db.commit()
+    db.refresh(neworeder)
+    response.status_code = 201
+    return neworeder
+
+
+@router_v1.get('/menus/{menu_id}')
+async def get_book(menu_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Menu).filter(models.Menu.menu_id == menu_id).first()
+
+@router_v1.get('/orders')
+async def get_books(db: Session = Depends(get_db)):
+    return db.query(models.Order).all()
+
 @router_v1.post('/books')
 async def create_book(book: dict, response: Response, db: Session = Depends(get_db)):
     # TODO: Add validation
-    newbook = models.Book(title=book['title'], author=book['author'], year=book['year'], is_published=book['is_published'])
+    newbook = models.Book(title=book['title'], author=book['author'], year=book['year'], is_published=book['is_published'],
+                           descripion=book['descripion'], type=book['type'], synopsis=book['synopsis'], picture=book['picture'])
     db.add(newbook)
     db.commit()
     db.refresh(newbook)
     response.status_code = 201
     return newbook
+
+@router_v1.post('/books')
+async def create_book(book: dict, response: Response, db: Session = Depends(get_db)):
+    # TODO: Add validation
+    newbook = models.Book(title=book['title'], author=book['author'], year=book['year'], is_published=book['is_published'],
+                           descripion=book['descripion'], type=book['type'], synopsis=book['synopsis'], picture=book['picture'])
+    db.add(newbook)
+    db.commit()
+    db.refresh(newbook)
+    response.status_code = 201
+    return newbook
+
+
+
+@router_v1.put('/books/{book_id}')
+async def update_book(book_id: int, books: dict, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        return {"detail": "Student not found"}
+    for key, value in books.items():
+        setattr(book, key, value)
+    db.commit()
+    db.refresh(book)
+    return {"detail": f"StudentID {book_id} updated successfully"}
+
+
+
 
 @router_v1.post('/Students')
 async def create_student(student: dict, response: Response, db: Session = Depends(get_db)):
@@ -86,7 +137,7 @@ async def get_student(student_id: str, db: Session = Depends(get_db)):
         return None
 
 
-@router_v1.patch('/Students/{student_id}')
+@router_v1.put('/Students/{student_id}')
 async def update_student(student_id: str, student_data: dict, db: Session = Depends(get_db)):
     student = db.query(models.Student).filter(models.Student.student_id == student_id).first()
     if not student:
