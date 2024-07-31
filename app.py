@@ -159,6 +159,18 @@ async def delete_student(student_id: str, db: Session = Depends(get_db)):
     db.delete(student)
     db.commit()
     return {"detail": f"StudentID {student_id} deleted successfully"}
+
+
+
+@router_v1.delete('/books/{book_id}')
+async def delete_book(book_id: str, db: Session = Depends(get_db)):
+    book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not book:
+        return {"detail": "book not found"}
+    
+    db.delete(book)
+    db.commit()
+    return {"detail": f"StudentID {book_id} deleted successfully"}
 # @router_v1.delete('/books/{book_id}')
 # async def delete_book(book_id: int, db: Session = Depends(get_db)):
 #     pass
